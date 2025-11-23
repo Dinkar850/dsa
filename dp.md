@@ -26,6 +26,12 @@
   <br>
 
 **For even better optimization, you can precompute the next valid index for each event using binary search and use it in the problem to compute next index in O(1) time, reducing the overall complexity to O(nk) instead of O(nklogn).**
+<br>
+
+**Similar questions:**
+
+- Weighted Job Scheduling:
+  https://www.geeksforgeeks.org/problems/weighted-job-scheduling/1
 
 ## 16th July
 

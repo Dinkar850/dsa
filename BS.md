@@ -43,3 +43,10 @@ auto fun = [&](int ht) {
 
 //normal BS then on mid as ht, if !fun(mid) means days > k, h = m - 1; otherwise l = h + 1, return l -1 as answer and do this until l <= h
 ```
+
+- watch: https://youtu.be/E2AxiwgWWXA?si=PJFR9GSJCw8fpkaQ
+  <br>
+
+**Similar questions** :
+
+- POTD 9th November: https://leetcode.com/problems/maximize-the-minimum-powered-city

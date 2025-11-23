@@ -186,4 +186,10 @@ int main() {
 - instead of conventional FIFO, elements with higher priority are served first that is removed first
 - one way can be smaller elements having higher priority
 - another can be larger elements having higher priority
-- implementing a PQ with conventional array would take O(n) time whereas using min Heap for first case and max Heap for second, it can be done in O(logn ) time
+- implementing a PQ with conventional array would take O(n) time whereas using min Heap for first case and max Heap for second, it can be done in O(logn) time
+
+## 06th November
+
+- learnt a pattern of `find median in a datastream`, where you are always concerned about one of the PQs, one PQ is min, another is max
+- if you want a PQ where you are needing to delete one of the specific elements, you might just be needing an ordered set, set can serve the top min element or the last max elemenet, it can also erase if the unique value is needed to be removed
+- concept of 2 such sets was being used in today's POTD
