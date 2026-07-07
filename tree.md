@@ -180,7 +180,15 @@ vector<vector<int>> verticalTraversal(TreeNode* root) {
 }
 ```
 
+- DFS Approach: https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree/submissions/2059349861/
+
 ## Boundary Traversal
+
+- Visualize the tree like this:
+- Find all leaf nodes
+- Left boundary traversal, go from left, if left has nothing go to right, skip leaf nodes, add nodes while going forward
+- Right boundary traversal, go from right, if right has nothing go to left, skip leaf nodes, add nodes while returning
+- VISUALIZE
 
 ```cpp
 void findLeft(Node *root,vector<int>&ans)
@@ -247,7 +255,6 @@ vector<int> boundaryTraversal(Node *root)
         ans.push_back(root->data);
         findLeft(root->left,ans);
         findLeaf(root->left,ans);
-        findLeaf(root->right,ans);
         findRight(root->right,ans);
         return ans;
     }
@@ -294,7 +301,7 @@ vector<int> topView(Node *root) {
 
 - now in the same line, we will be dealing with the last entered value in the map of values for that column, coz we want the last row of each vertical line
 
-- so in line number: 255, just change it to `mp[col] = node -> data`, now we will always be updating it and access the last entered value for each col or vertical line
+- so in line number: 255, just change it to `mp[col] = node -> data` unconditionally, now we will always be updating it with the last entered value for each col or vertical line
 
 ## Right/Left view of BT
 
@@ -317,5 +324,56 @@ vector<int> rightSideView(TreeNode* root) {
         if(!level.empty()) ans.push_back(level.back()); //for left take the front or first element
     }
     return ans;
+}
+```
+
+## Root to Leaf / Node path in a BT
+
+- no explanation is needed its pretty straightforward
+- Soln link: https://leetcode.com/problems/binary-tree-paths/submissions/2059486583/
+
+```cpp
+void findPath(TreeNode* node, vector<string>& ans, string temp) {
+    temp += to_string(node->val);  // Add the current node value to the path
+    if (node->left) findPath(node->left, ans, temp + "->");  // Traverse left
+    if (node->right) findPath(node->right, ans, temp + "->"); // Traverse right
+    if (!node->left && !node->right) ans.push_back(temp);  // Add path if leaf node
+}
+
+vector<string> binaryTreePaths(TreeNode* root) {
+    vector<string> ans;
+    if (root) findPath(root, ans, "");  // Start traversal from the root
+    return ans;
+}
+```
+
+## LCA of a BT
+
+- First method is to calculate the paths to the provided nodes using above algorithm (store in an array and return when node (instead of leaf) found)
+- Compare both paths and return the farthest Node common in both paths
+- This approach has time and space complexity of $${O(2*N)}$$
+
+### Second appraoch
+
+- Traverse to each node using DFS
+- Below node = root
+- If you land at a matched node (node -> val == required_node -> val), return the node otherwise for every other node return null
+- At a node, if both left and right function calls that is to node -> left and node -> right, return a non null value, that means the node is the LCA
+- if one of the left or right returns a value, return that value to above calls
+- and if the node we reached is itself the required_node, return the node
+- Here's the code for better understanding:
+
+```cpp
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (!root || root -> val == p -> val || root -> val == q -> val) return root; // root matched with one of the required_nodes
+    TreeNode* f = lowestCommonAncestor(root -> left, p, q);
+    TreeNode* s = lowestCommonAncestor(root -> right, p, q);
+    if (f && s) return root; //both matched, return root
+    //return one of them if matched
+    if(f && !s) return f;
+    if(!f && s) return s;
+
+    // return null if none matched
+    return nullptr;
 }
 ```

@@ -184,7 +184,11 @@ public:
 - store pair of {weight, node} in minHeap, to init store {0, src} in minHeap
 - take the pair out of pq, this has the smallest weight and so we ensure that we are exploring the minimum weight always.
 - explore further nodes thru this node
-- just check if `dist[it.second] > dist[node_taken_out_of_queue] + it.first`, if yes update dist and push into minHeap, no concept of visited as only pushing nodes in minHeap having least weight for a node.
+- just check if `dist[it.first] > dist[node_taken_out_of_queue] (or wt) + it.second`, if yes update dist: `dist[it.first] = wt + it.second` and push into minHeap, no concept of visited as only pushing nodes in minHeap having least weight for a node.
+
+### Imp Questions came across:
+
+- Djikstra's + BFS on answer to skip unnecessary path explorations: https://leetcode.com/problems/network-recovery-pathways/submissions/2059254647/?envType=daily-question&envId=2026-07-034
 
 ## Djisktra using other DS:
 
@@ -379,7 +383,6 @@ int spanningTree(int V, vector<vector<int>> adj[]) {
 - DSU consists of two main operations: findParent and unionBySize or unionByRank
 - we create components using unionBySize or unionByRank and findParent is used to find whether a node is in the same component or not by checking parents of each node. If `findParent(node1) == findParent(node2)`, then same component.
 - algorithm for find and union:
-
   - **findParent:** finds **ultimate parent** of a node, the ultimate parent is not the immediate parent but the root of the component to which the node is connected to. for example, consider edges [1, 2], [1, 3], [3, 4], [4, 5] then 1 is the ultimate parent of every node. To find the ultimate parent we would do something like, `return findParent(parent[5])` until `parent[node] == node` where `parent` is the vector storing ultimate parent of each node, and initially every node is the parent of itself. This algo for finding parent would take `log(n)` time, that is first find parent of n, then parent of parent of n and so on. But we wanna do it in constant time, so we perform something called `path compression`.
   - In **path compression**, when we find the ultimate parent of 5 for the first time, we also update the parent of 5 to ultimate parent of 5 so that the next time we wanna find ultimate parent of 5, it would be in constant time, that is we would have updated the parent of 5 to ultimate parent of 5 already. We do it by `return parent[5] = findParent(parent[5])`, instead of `return findParent[parent[5]]`.
 
