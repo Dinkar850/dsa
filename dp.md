@@ -218,3 +218,15 @@ class Solution {
     }
 };
 ```
+
+## 22nd Jul 26
+
+## LIS using Lower bounds
+
+- Apart from the approach of having a dp array, looping over each ele and finding max value in dp array corresponding to index of smaller elements than current ele and storing max + 1 for that ele, there's another appraoch:
+- Create an array lis
+- If the current ele is strictly greater than largest ele of lis (lis's last ele), push ele into lis
+- If not, find the lower bound of ele in lis (lower bound ensures index is well within the lis, not out of bounds), and above condition ensured there exists an element in lis thats smaller than the current ele
+- Replacing the lis's lower bound with curr ele ensures we are trying to make overall lis as less as possible (like 18's lower bound would be 108, but later replaced by 18, so overall lis becomes smaller. So next timee 19 comes in we can directly push to lis and make it longer. YO)
+- Approach: https://leetcode.com/problems/longest-increasing-subsequence/submissions/1506108455/
+- You can also directly calc lower bound and check if its lis's end, if yes add the ele to lis: https://leetcode.com/problems/longest-increasing-subsequence/submissions/1506104915/
