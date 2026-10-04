@@ -377,3 +377,475 @@ TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
     return nullptr;
 }
 ```
+
+## 4/10/2026
+
+## Max width of a BT
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int widthOfBinaryTree(TreeNode* root) {
+
+        // idea is to store index of each node in the tree
+        // index is level ordered here
+        // for left, index becomes 2 * i + 1, for right it becomes 2 * i + 2; for 0 based indexing
+        // also change all indices to index - min_level_index that is index - q.front().second which will make starting as 0 and other as 1, 2, 3 etc, so that next level nodes start from 1 only and there is no overflow while calculating indices as we are doubling + 1 index at each level
+
+        // calculate l - f + 1 finally for a level, where l = last node of the level and f = first node of the level;
+
+
+
+        int res = 0;
+
+        //last - first + 1;
+
+
+        queue<pair<TreeNode*, int>> q;
+        q.push({root, 1});
+        // int res = 0;
+        // int mini = 1;
+
+        while(!q.empty()) {
+            int n = q.size();
+            int f, l, i = 0;
+            int mini = q.front().second; // take the minimum of the level so that next index starts from 0;
+            // int tmini = INT_MAX;
+            while(i < n) {
+                auto p = q.front();
+                q.pop();
+                auto node = p.first;
+                int ind = p.second - mini;
+                // tmini = min(tmini, ind);
+                if(node -> left) q.push({node -> left, (long long)2 * ind + 1});
+                if(node -> right) q.push({node -> right, (long long)2 * ind + 2});
+                if(i == 0) f = ind;
+                if(i == n - 1) l = ind;
+                i++;
+            }
+            res = max(res, l - f + 1);
+            // mini = tmini;
+        }
+
+        return res;
+
+    }
+};
+```
+
+## All nodes at distance K
+
+```cpp
+class Solution {
+public:
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        // Idea is to store the parent nodes of each node so that we also have a pointer that points backward,now start from the target node and perform a bfs (like we do in a graph), [store {node, distance}] store the nodes found at k distance
+
+        // use a map to store the parent of the nodes
+
+        // also maintain a vis array to not loop between nodes
+
+
+        unordered_map<Node*, Node*> par;
+
+        queue<Node*> q;
+        q.push(root);
+
+        // store parents using bfs
+        while(!q.empty()) {
+            auto node = q.front();
+            q.pop();
+
+            auto l = node -> left;
+            auto r = node -> right;
+
+            if(l) {
+                q.push(l);
+                par[l] = node;
+            }
+
+            if(r) {
+                q.push(r);
+                par[r] = node;
+            }
+        }
+
+        vector<int> res, vis(501);
+
+        queue<pair<Node*, int>> qp;
+        vis[target -> val] = 1;
+
+        // start bfs from target equivalent to source in a graph
+        // go to all possible directions(parent, left and right with dist + 1)
+        qp.push({target, 0});
+        while(!qp.empty()) {
+            auto node = qp.front().first;
+            int dist = qp.front().second;
+            qp.pop();
+
+            if(dist == k) {
+                res.push_back(node -> val);
+            }
+
+            if(par.count(node) > 0) {
+                auto p = par[node];
+                if(!vis[p -> val]) {
+                    qp.push({par[node], dist + 1});
+                    vis[p -> val] = 1;
+                }
+            }
+            auto l = node -> left;
+            auto r = node -> right;
+            if(l) {
+                if(!vis[l -> val]) {
+                    qp.push({l, dist + 1});
+                    vis[l -> val] = 1;
+                }
+            }
+            if(r) {
+                if(!vis[r -> val]) {
+                    qp.push({r, dist + 1});
+                    vis[r -> val] = 1;
+                }
+            }
+
+        }
+
+        return res;
+    }
+};
+```
+
+## Count all nodes in a complete binary tree
+
+- to be done in less than O(n) time
+
+```cpp
+class Solution {
+    int leftHeight(TreeNode* root) {
+        int res = 0;
+        while(root) {
+            res++;
+            root = root -> left;
+        }
+        return res;
+    }
+
+    int rightHeight(TreeNode* root) {
+        int res = 0;
+        while(root) {
+            res++;
+            root = root -> right;
+        }
+        return res;
+    }
+public:
+    int countNodes(TreeNode* root) {
+        // First we need to calculate in less than O(N)
+
+        // Idea is that we calculate heights of subtrees and see accordingly if our subtree is a completely complete (all nodes filled) binary tree
+
+        // To check if its completely complete. we see if our left height (go till the end from left) and right height (go till the end from right) are equal at a particular node, so we need to calculate lh and rh at each node in O(log(remaining nodes)) time
+
+        // If yes, its a complete complete BT and we simply return 2 power (left or right height) + 1 without actually traversing all nodes but left and right boudnary; that is the formula for total nodes in a complete binary tree
+
+        // If not, we go to the left subtree and right subtree again by returning 1 + same_fun(root -> left) + same_fun(root -> right)
+        // These left and right would be subtrees again where above rules apply
+
+        // TC: O(logN) at max for nodes and calculation of height per node = O(logN), so in total TC is O(logN squared); and SC for aux stack space = O(logN)
+
+        if(!root) return 0;
+        int lh = leftHeight(root);
+        // heights matched, return 2 power height - 1 nodes
+        if(lh == rightHeight(root)) return (1 << lh) - 1;
+
+        // if not return 1 + same thing for left subtree + same thing for right subtree
+        return 1 + countNodes(root -> left) + countNodes(root -> right);
+
+
+    }
+};
+```
+
+## Flatten Binary Tree
+
+- in pre-order traversal fashion
+
+```cpp
+class Solution {
+
+    // Detach left subtree, attach to right, attach original right subtree at the right end of the left subtree
+public:
+    void flatten(TreeNode* root) {
+        if(!root) return;
+        if(!root -> left) {
+            flatten(root -> right);
+            return;
+        }
+        TreeNode* dummy = root -> right;
+        root -> right = nullptr;
+        root -> right = root -> left;
+        root -> left = nullptr;
+        TreeNode *p = root;
+        while(p -> right) {
+            p = p -> right;
+        }
+        p -> right = dummy;
+        flatten(root -> right);
+        return;
+    }
+};
+```
+
+## Requirements needed to create a unique Binary Tree
+
+- We cannot create a unique BT only using pre and post order traversals
+- We can create a BT with inorder + preorder; inorder + postorder however
+
+## Construct a BT using inorder + preorder traversals
+
+```cpp
+class Solution {
+    // Idea is that first element of preorder is the root (as preorder goes like root, left ,right)
+    // We find that root's position in the inorder traversal using a hash-map storing root-> val mapping to corresponding index
+    // Then whatever there is in that index's left is the inorder traversal of the left subtree and on right is same for right subtree
+    // the root + 1 is the root of the left subtree in pre-order, and root + numsleft(no. of nodes in inorder before root) + 1 is the pre-order of right subtree
+    // So now we have subtree traversals of left and right, we have broken down to smaller sub-problem
+    // we do the same recursive calls again by updating starting and ending positions
+
+    private:
+    TreeNode *build(vector<int>&preoder, int is, int ie, int ps, int pe,  unordered_map <int, int> &hm) {
+        if(pe < ps || ie < is) return NULL;
+        int index = hm[preoder[ps]];
+        int numsLeft = index - is;
+        TreeNode *root = new TreeNode(preoder[ps]);
+        // cout << preoder[ps] << " ";
+        root -> left = build(preoder, is, index - 1, ps + 1, ps + numsLeft, hm);
+        root -> right = build(preoder, index + 1, ie, ps + numsLeft + 1, pe, hm);
+        return root;
+    }
+
+
+public:
+    TreeNode* buildTree(vector<int>& preoder, vector<int>& inorder) {
+        if(inorder.size() != preoder.size()) return NULL;
+
+        int pe = preoder.size() - 1;
+        unordered_map <int, int> hm;
+        for (int i = 0; i <= pe; i++) {
+            hm[inorder[i]] = i;
+        }
+        // for (int i : preoder) cout << i << " ";
+        // cout << endl;
+        return build(preoder, 0, pe, 0, pe, hm);
+    }
+};
+```
+
+## Construct BT from inorder+postorder traversals
+
+- last node is the root in postorder
+- find that node in inorder
+- (index - inorder_start) are the number of nodes in left subtree
+- (index_end - index) are the number of nodes in the right subtree
+- new postorder would be (for right); pe - 1, ps - nums_left - 1;
+- for left would be, pe - numsleft, etc, etc
+- you can deduce then
+- use this example: inorder ={40, 20, 50, 10 ,60, 30}; postorder = {40, 50, 20, 60, 30, 10};
+
+```cpp
+class Solution {
+    public:
+    TreeNode *build(vector<int>&postorder, int is, int ie, int ps, int pe,  unordered_map <int, int> &hm) {
+        if(pe < ps || ie < is) return NULL;
+        int index = hm[postorder[pe]];
+        int numsLeft = index - is;
+        TreeNode *root = new TreeNode(postorder[pe]);
+        root -> left = build(postorder, is, index - 1, ps, ps + numsLeft - 1, hm);
+        root -> right = build(postorder, index + 1, ie, ps + numsLeft, pe - 1, hm);
+        return root;
+    }
+
+
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        if(inorder.size() != postorder.size()) return NULL;
+
+        int pe = postorder.size() - 1;
+        unordered_map <int, int> hm;
+        for (int i = 0; i <= pe; i++) {
+            hm[inorder[i]] = i;
+        }
+        return build(postorder, 0, pe, 0, pe, hm);
+    }
+};
+```
+
+## Serialise / Deserialise a Binary Tree
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+    // Idea is:
+
+    // During serialisation
+    // Do level order traversal
+    // For a node, convert the value to a string, add it to res and insert a comma
+    // For a nullptr, add a # to the string
+
+    // During de-serialisation:
+    // Traverse until you reach a comma
+    // form the number
+    // insert to vector
+
+    // start with first integer
+    // push into queue
+    // create a node for the queue,
+    // take next two digits
+    // for # add nullptr
+    // for value, add node and add in queue
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        if(!root) return "#,";
+
+        string res = "";
+        queue<TreeNode*> q;
+        res += to_string(root -> val);
+        res.push_back(',');
+        q.push(root);
+
+        while(!q.empty()) {
+            auto node = q.front();
+            q.pop();
+
+            // string temp = to_string(node -> val);
+            // temp.push_back(',');
+            // res += temp;
+
+            auto l = node -> left;
+            if(!l) {
+                res += "#,";
+            } else {
+                q.push(l);
+                string temp = to_string(l -> val);
+                temp.push_back(',');
+                res += temp;
+            }
+
+            auto r = node -> right;
+            if(!r) {
+                res += "#,";
+            } else {
+                q.push(r);
+                string temp = to_string(r -> val);
+                temp.push_back(',');
+                res += temp;
+            }
+        }
+
+        cout << res << endl;
+        return res;
+
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        if(data == "#,") return nullptr;
+
+        vector<int> nums;
+        //convert string digits and # to numbers and store in a vector
+
+        int i = 0;
+        int n = data.length();
+
+        while(i < n) {
+            if(data[i] == '#') {
+                nums.push_back(INT_MAX);
+                i += 2;
+            } else {
+                int num = 0;
+                int neg = false;
+                if(data[i] == '-') {
+                    neg = true;
+                    i++;
+                }
+                while(data[i] != ',') {
+                    num = num * 10 + (data[i] - 48);
+                    i++;
+                }
+                if(neg) num *= -1;
+                nums.push_back(num);
+                i++;
+            }
+        }
+
+        queue<TreeNode*> q;
+        i = 1;
+        auto root = new TreeNode(nums[0]);
+        q.push(root);
+
+        while(!q.empty()) {
+            auto node = q.front();
+            // auto node = new TreeNode(num);
+            q.pop();
+
+            // attach left if exists
+            if(nums[i] != INT_MAX) {
+                auto l = new TreeNode(nums[i]);
+                node -> left = l;
+                q.push(l);
+            } else {
+                node -> left = nullptr;
+            }
+
+            i++;
+            //attach right node
+            if(nums[i] != INT_MAX) {
+                auto r = new TreeNode(nums[i]);
+                node -> right = r;
+                q.push(r);
+            } else {
+                node -> right = nullptr;
+            }
+
+            i++;
+            // move to next item
+        }
+
+        return root;
+
+
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec ser, deser;
+// TreeNode* ans = deser.deserialize(ser.serialize(root));
+```
+
+## Morris Inorder and Preorder Traversal
+
+- why: normal traversals take O(n) time and O(n) space while morris takes nearly O(n) and constant space
+- uses a concept called `Threaded Binary Tree`
+- watch vdos best for revision
