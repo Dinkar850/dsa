@@ -61,6 +61,54 @@ class Solution {
 };
 ```
 
+## Insert in a BST
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+
+    def insertIntoBST(self, root: TreeNode | None, val: int) -> TreeNode | None:
+        if not root:
+            root = TreeNode(val=val)
+            return root
+
+        if root.val > val:
+            root.left = self.insertIntoBST(root.left, val)
+            return root
+
+        if root.val < val:
+            root.right = self.insertIntoBST(root.right, val)
+            return root
+
+        return root
+
+```
+
+## Delete node in a BST
+
+<img src="assets/delete_node_bst.png">
+
+## Valid BST
+
+```cpp
+class Solution {
+    bool solve(TreeNode* root, long long mini, long long maxi) {
+        if(!root) return true;
+        if(root -> val <= mini || root -> val >= maxi) return false;
+        return solve(root -> left, mini, root -> val) && solve(root -> right, root -> val, maxi);
+    }
+public:
+    bool isValidBST(TreeNode* root) {
+        return solve(root, LONG_LONG_MIN, LONG_LONG_MAX);
+    }
+};
+```
+
 ## 26th July26
 
 ## Kth smallest node in BST
@@ -79,3 +127,28 @@ if(cnt == k) {
 
 - Solution: https://leetcode.com/submissions/detail/2082275485/
 - for kth largest, use n - kth smallest :D
+
+```python
+class Solution:
+    def solve(self, root, k):
+        if not root:
+            return None
+
+        # Left
+        ans = self.solve(root.left, k)
+        if ans is not None:
+            return ans
+
+        # Current node, mimics pass by reference in c++
+        self.cnt += 1
+
+        if self.cnt == k:
+            return root.val
+
+        # Right
+        return self.solve(root.right, k)
+
+    def kthSmallest(self, root: TreeNode | None, k: int) -> int:
+        self.cnt = 0
+        return self.solve(root, k)
+```
